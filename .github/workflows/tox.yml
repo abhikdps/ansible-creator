@@ -32,7 +32,7 @@ jobs:
         run: npm install -g @devcontainers/cli
 
       - name: Start Devcontainer
-        run: devcontainer build --workspace-directory ./tests/fixtures/collection/testorg/testcol
+        run: devcontainer build --workspace-folder ./tests/fixtures/collection/testorg/testcol
 
       - name: Run tests
-        run: devcontainer exec --workspace-directory ./tests/fixtures/collection/testorg/testcol adt --version
+        run: devcontainer exec --workspace-folder ./tests/fixtures/collection/testorg/testcol adt --version
