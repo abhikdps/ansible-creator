@@ -31,8 +31,8 @@ jobs:
       - name: Install devcontainer cli
         run: npm install -g @devcontainers/cli
 
-      - name: Execute cmd on Devcontainer
-        run: |
-          devcontainer build --workspace-folder ./tests/fixtures/collection/testorg/testcol
-          devcontainer exec --workspace-folder ./tests/fixtures/collection/testorg/testcol adt --version
+      - name: Start Devcontainer
+        run: devcontainer up --workspace-folder ./tests/fixtures/collection/testorg/testcol
 
+      - name: Run tests
+        run: devcontainer exec --workspace-folder ./tests/fixtures/collection/testorg/testcol adt --version
