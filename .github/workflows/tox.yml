@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   tox:
-    uses: ansible/team-devtools/.github/workflows/tox.yml@main
+    uses: abhikdps/team-devtools/.github/workflows/tox.yml@main
 
   test-devconatiner:
     needs: tox
