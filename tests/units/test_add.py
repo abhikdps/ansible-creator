@@ -310,7 +310,7 @@ def test_run_error_unsupported_resource_type(
     assert "Unsupported resource type: unsupported_type" in str(exc_info.value)
 
 
-@pytest.mark.skipif(sys.platform == "darwin", reason="Skip on macOS")
+# @pytest.mark.skipif(sys.platform == "darwin", reason="Skip on macOS")
 def test_run_success_add_devcontainer(
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
@@ -326,9 +326,6 @@ def test_run_success_add_devcontainer(
         tmp_path: Temporary directory path.
         cli_args: Dictionary, partial Add class object.
         monkeypatch: Pytest monkeypatch fixture.
-
-    Raises:
-        FileNotFoundError: If the 'devcontainer' executable is not found in the PATH.
     """
     # Set the resource_type to devcontainer
     cli_args["resource_type"] = "devcontainer"
@@ -376,6 +373,78 @@ def test_run_success_add_devcontainer(
         )
         is not None
     ), result
+    assert re.search("Note: Resource added to", result) is not None
+
+    # devcontainer_executable = shutil.which("devcontainer")
+    # if not devcontainer_executable:
+    #     err = "devcontainer executable not found in PATH"
+    #     raise FileNotFoundError(err)
+
+    # # Start the devcontainer using devcontainer CLI
+    # container_cmd_output = subprocess.run(
+    #     [
+    #         devcontainer_executable,
+    #         "up",
+    #         "--workspace-folder",
+    #         tmp_path,
+    #         "--remove-existing-container",
+    #     ],
+    #     capture_output=True,
+    #     text=True,
+    #     check=True,
+    # )
+    # container_id = json.loads(container_cmd_output.stdout.strip("\n")).get("containerId")
+    # print(container_id)
+
+    # # Execute the command within the container
+    # container_cmd_result = subprocess.run(
+    #     [devcontainer_executable, "exec", "--container-id", container_id, "adt", "--version"],
+    #     capture_output=True,
+    #     text=True,
+    #     check=True,
+    # )
+    # assert container_cmd_result.returncode == 0
+
+    # docker_executable = shutil.which("docker")
+    # if not docker_executable:
+    #     err = "docker executable not found in PATH"
+    #     raise FileNotFoundError(err)
+    # # Stop devcontainer
+    # stop_container = subprocess.run(
+    #     [docker_executable, "rm", "-f", container_id],
+    #     capture_output=True,
+    #     text=True,
+    #     check=True,
+    # )
+    # assert stop_container.returncode == 0
+
+
+@pytest.mark.skipif(sys.platform == "darwin", reason="Skip on macOS")
+def test_devcontainer_usability(
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+    cli_args: ConfigDict,
+) -> None:
+    """Test Add.run() for adding a devcontainer.
+
+    Successfully adds devcontainer to path.
+
+    Args:
+        capsys: Pytest fixture to capture stdout and stderr.
+        tmp_path: Temporary directory path.
+        cli_args: Dictionary, partial Add class object.
+
+    Raises:
+        FileNotFoundError: If the 'devcontainer' executable is not found in the PATH.
+    """
+    # Set the resource_type to devcontainer
+    cli_args["resource_type"] = "devcontainer"
+    cli_args["image"] = "auto"
+    add = Add(
+        Config(**cli_args),
+    )
+    add.run()
+    result = capsys.readouterr().out
     assert re.search("Note: Resource added to", result) is not None
 
     devcontainer_executable = shutil.which("devcontainer")
