@@ -17,8 +17,8 @@ concurrency:
 
 jobs:
   tox:
-    uses: abhikdps/team-devtools/.github/workflows/tox.yml@chore/tox-node
-    with: 
+    uses: abhikdps/team-devtools/.github/workflows/tox.yml@main
+    with:
       node-version-file: .tool-versions
 
   test-devcontainer:
