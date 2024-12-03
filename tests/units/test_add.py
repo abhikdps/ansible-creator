@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
 import sys
 
@@ -309,7 +310,7 @@ def test_run_error_unsupported_resource_type(
     assert "Unsupported resource type: unsupported_type" in str(exc_info.value)
 
 
-@pytest.mark.skipif(sys.platform == "darwin", reason="Test runs only on macOS")
+@pytest.mark.skipif(sys.platform == "darwin", reason="Skip on macOS")
 def test_run_success_add_devcontainer(
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
@@ -325,6 +326,9 @@ def test_run_success_add_devcontainer(
         tmp_path: Temporary directory path.
         cli_args: Dictionary, partial Add class object.
         monkeypatch: Pytest monkeypatch fixture.
+
+    Raises:
+        FileNotFoundError: If the 'devcontainer' executable is not found in the PATH.
     """
     # Set the resource_type to devcontainer
     cli_args["resource_type"] = "devcontainer"
@@ -374,9 +378,14 @@ def test_run_success_add_devcontainer(
     ), result
     assert re.search("Note: Resource added to", result) is not None
 
+    devcontainer_path = shutil.which("devcontainer")
+    if not devcontainer_path:
+        err = "devcontainer executable not found in PATH"
+        raise FileNotFoundError(err)
+
     # Start the devcontainer using devcontainer CLI
-    container_cmd_output = subprocess.run(
-        ["devcontainer", "up", "--workspace-folder", tmp_path, "--remove-existing-container"],
+    container_cmd_output = subprocess.run(  # noqa: S603
+        [devcontainer_path, "up", "--workspace-folder", tmp_path, "--remove-existing-container"],
         capture_output=True,
         text=True,
         check=True,
@@ -385,8 +394,8 @@ def test_run_success_add_devcontainer(
     print(container_id)
 
     # Execute the command within the container
-    container_cmd_result = subprocess.run(
-        ["devcontainer", "exec", "--container-id", container_id, "adt", "--version"],
+    container_cmd_result = subprocess.run(  # noqa: S603
+        [devcontainer_path, "exec", "--container-id", container_id, "adt", "--version"],
         capture_output=True,
         text=True,
         check=True,
@@ -394,8 +403,11 @@ def test_run_success_add_devcontainer(
     assert container_cmd_result.returncode == 0
 
     # Stop devcontainer
-    stop_container = subprocess.run(
-        ["docker", "rm", "-f", container_id], capture_output=True, check=True
+    stop_container = subprocess.run(  # noqa: S603
+        ["/usr/bin/docker", "rm", "-f", container_id],
+        capture_output=True,
+        text=True,
+        check=True,
     )
     assert stop_container.returncode == 0
 
