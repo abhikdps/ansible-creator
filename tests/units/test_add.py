@@ -392,7 +392,7 @@ def test_devcontainer_usability(
         cli_args: Dictionary, partial Add class object.
 
     Raises:
-        FileNotFoundError: If the 'devcontainer' executable is not found in the PATH.
+        FileNotFoundError: If the 'npm' or 'docker' executable is not found in the PATH.
     """
     # Set the resource_type to devcontainer
     cli_args["resource_type"] = "devcontainer"
@@ -404,29 +404,32 @@ def test_devcontainer_usability(
     result = capsys.readouterr().out
     assert re.search("Note: Resource added to", result) is not None
 
-    devcontainer_executable = shutil.which("devcontainer")
-    if not devcontainer_executable:
-        err = "devcontainer executable not found in PATH"
+    npm_executable = shutil.which("npm")
+    if not npm_executable:
+        err = "npm executable not found in PATH"
         raise FileNotFoundError(err)
 
     # Start the devcontainer using devcontainer CLI
-    container_cmd_output = subprocess.run(  # noqa: S603
+    devcontainer_up_cmd = (
+        f"devcontainer up--workspace-folder {tmp_path} --remove-existing-container"
+    )
+    container_up_output = subprocess.run(  # noqa: S603
         [
-            devcontainer_executable,
-            "up",
-            "--workspace-folder",
-            tmp_path,
-            "--remove-existing-container",
+            npm_executable,
+            "exec",
+            "-c",
+            devcontainer_up_cmd,
         ],
         capture_output=True,
         text=True,
         check=True,
     )
-    container_id = json.loads(container_cmd_output.stdout.strip("\n")).get("containerId")
+    container_id = json.loads(container_up_output.stdout.strip("\n")).get("containerId")
 
     # Execute the command within the container
+    devcontainer_exec_cmd = f"devcontainer exec --container-id {container_id} adt --version"
     container_cmd_result = subprocess.run(  # noqa: S603
-        [devcontainer_executable, "exec", "--container-id", container_id, "adt", "--version"],
+        [npm_executable, "exec", "-c", devcontainer_exec_cmd],
         capture_output=True,
         text=True,
         check=True,
