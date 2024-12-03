@@ -378,14 +378,20 @@ def test_run_success_add_devcontainer(
     ), result
     assert re.search("Note: Resource added to", result) is not None
 
-    devcontainer_path = shutil.which("devcontainer")
-    if not devcontainer_path:
+    devcontainer_executable = shutil.which("devcontainer")
+    if not devcontainer_executable:
         err = "devcontainer executable not found in PATH"
         raise FileNotFoundError(err)
 
     # Start the devcontainer using devcontainer CLI
     container_cmd_output = subprocess.run(  # noqa: S603
-        [devcontainer_path, "up", "--workspace-folder", tmp_path, "--remove-existing-container"],
+        [
+            devcontainer_executable,
+            "up",
+            "--workspace-folder",
+            tmp_path,
+            "--remove-existing-container",
+        ],
         capture_output=True,
         text=True,
         check=True,
@@ -395,16 +401,20 @@ def test_run_success_add_devcontainer(
 
     # Execute the command within the container
     container_cmd_result = subprocess.run(  # noqa: S603
-        [devcontainer_path, "exec", "--container-id", container_id, "adt", "--version"],
+        [devcontainer_executable, "exec", "--container-id", container_id, "adt", "--version"],
         capture_output=True,
         text=True,
         check=True,
     )
     assert container_cmd_result.returncode == 0
 
+    docker_executable = shutil.which("docker")
+    if not docker_executable:
+        err = "docker executable not found in PATH"
+        raise FileNotFoundError(err)
     # Stop devcontainer
     stop_container = subprocess.run(  # noqa: S603
-        ["/usr/bin/docker", "rm", "-f", container_id],
+        [docker_executable, "rm", "-f", container_id],
         capture_output=True,
         text=True,
         check=True,
