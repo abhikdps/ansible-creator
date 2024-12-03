@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 
 from filecmp import cmp, dircmp
 from typing import TYPE_CHECKING, TypedDict
@@ -308,6 +309,7 @@ def test_run_error_unsupported_resource_type(
     assert "Unsupported resource type: unsupported_type" in str(exc_info.value)
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="Test runs only on macOS")
 def test_run_success_add_devcontainer(
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
