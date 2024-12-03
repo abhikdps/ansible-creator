@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "main"
+      - "test-devcontainer"
   pull_request:
     branches:
       - "main"
@@ -16,7 +17,9 @@ concurrency:
 
 jobs:
   tox:
-    uses: ansible/team-devtools/.github/workflows/tox.yml@main
+    uses: abhikdps/team-devtools/.github/workflows/tox.yml@chore/tox-node
+    with: 
+      node-version-file: .tool-versions
 
   test-devcontainer:
     needs: tox

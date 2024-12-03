@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import json
 import re
+import subprocess
 
 from filecmp import cmp, dircmp
 from typing import TYPE_CHECKING, TypedDict
@@ -369,6 +371,31 @@ def test_run_success_add_devcontainer(
         is not None
     ), result
     assert re.search("Note: Resource added to", result) is not None
+
+    # Start the devcontainer using devcontainer CLI
+    container_cmd_output = subprocess.run(
+        ["devcontainer", "up", "--workspace-folder", tmp_path, "--remove-existing-container"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    container_id = json.loads(container_cmd_output.stdout.strip("\n")).get("containerId")
+    print(container_id)
+
+    # Execute the command within the container
+    container_cmd_result = subprocess.run(
+        ["devcontainer", "exec", "--container-id", container_id, "adt", "--version"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert container_cmd_result.returncode == 0
+
+    # Stop devcontainer
+    stop_container = subprocess.run(
+        ["docker", "rm", "-f", container_id], capture_output=True, check=True
+    )
+    assert stop_container.returncode == 0
 
 
 def test_run_success_add_plugin_filter(
