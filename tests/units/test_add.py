@@ -374,7 +374,7 @@ def test_run_success_add_devcontainer(
 
     # Start the devcontainer using devcontainer CLI
     docker_cmd = subprocess.run(
-        ["docker", "--version"],
+        ["which", "-a", "docker"],
         capture_output=True,
         text=True,
         check=True,
