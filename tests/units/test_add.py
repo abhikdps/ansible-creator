@@ -7,7 +7,6 @@ import json
 import re
 import shutil
 import subprocess
-import sys
 
 from filecmp import cmp, dircmp
 from typing import TYPE_CHECKING, TypedDict
@@ -376,7 +375,7 @@ def test_run_success_add_devcontainer(
 
 
 # Skip this test on macOS due to unavailability of docker on macOS GHA runners
-@pytest.mark.skipif(sys.platform == "darwin", reason="Skip test on macOS")
+# @pytest.mark.skipif(sys.platform == "darwin", reason="Skip test on macOS")
 def test_devcontainer_usability(
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
@@ -411,7 +410,7 @@ def test_devcontainer_usability(
 
     # Start the devcontainer using devcontainer CLI
     devcontainer_up_cmd = (
-        f"devcontainer up--workspace-folder {tmp_path} --remove-existing-container"
+        f"devcontainer up --workspace-folder {tmp_path} --remove-existing-container"
     )
     container_up_output = subprocess.run(  # noqa: S603
         [
