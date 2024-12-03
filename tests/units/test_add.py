@@ -373,6 +373,14 @@ def test_run_success_add_devcontainer(
     assert re.search("Note: Resource added to", result) is not None
 
     # Start the devcontainer using devcontainer CLI
+    docker_cmd = subprocess.run(
+        ["docker", "--version"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert docker_cmd.returncode == 0
+
     container_cmd_output = subprocess.run(
         ["devcontainer", "up", "--workspace-folder", tmp_path, "--remove-existing-container"],
         capture_output=True,
